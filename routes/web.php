@@ -60,6 +60,7 @@ Route::middleware(['auth', 'verified.email'])->group(function () {
     Route::middleware('permission:admin.queue')->group(function () {
         Route::get('/admin/queue', [AdminController::class, 'queue'])->name('admin.queue');
         Route::post('/admin/queue/{id}/approve', [AdminController::class, 'approveRegistration'])->name('admin.queue.approve');
+        Route::post('/admin/queue/{id}/uncertain', [AdminController::class, 'uncertainRegistration'])->name('admin.queue.uncertain');
         Route::post('/admin/queue/{id}/reject', [AdminController::class, 'rejectRegistration'])->name('admin.queue.reject');
     });
 

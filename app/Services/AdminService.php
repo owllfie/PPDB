@@ -141,7 +141,7 @@ class AdminService
 
     public function getRegistrationQueue(?string $search = null, string $sort = 'created_at', string $order = 'desc')
     {
-        $query = Registrasi::where('status', 'pending');
+        $query = Registrasi::whereIn('status', ['pending', 'uncertain']);
 
         if ($search) {
             $query->where(function($q) use ($search) {
@@ -167,6 +167,11 @@ class AdminService
     public function rejectRegistration(Registrasi $registrasi): void
     {
         $registrasi->update(['status' => 'rejected']);
+    }
+
+    public function uncertainRegistration(Registrasi $registrasi): void
+    {
+        $registrasi->update(['status' => 'uncertain']);
     }
 
     public function getActivityLogs(?string $search = null, string $sort = 'created_at', string $order = 'desc')
@@ -263,6 +268,10 @@ class AdminService
                 $rejectedTrend[$date->format('M Y')] = Registrasi::whereYear('created_at', $year)
                     ->whereMonth('created_at', $month)
                     ->where('status', 'rejected')->count();
+
+                $uncertainTrend[$date->format('M Y')] = Registrasi::whereYear('created_at', $year)
+                    ->whereMonth('created_at', $month)
+                    ->where('status', 'uncertain')->count();
             }
         }
 

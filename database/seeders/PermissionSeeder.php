@@ -36,12 +36,16 @@ class PermissionSeeder extends Seeder
 
         $role3 = \App\Models\Role::find(3); // User Admin
         if ($role3) {
-            $role3->permissions()->sync(\App\Models\Permission::where('slug', 'admin.users')->get());
+            $role3->permissions()->sync(
+                \App\Models\Permission::whereIn('slug', ['admin.dashboard', 'admin.users'])->get()
+            );
         }
 
         $role2 = \App\Models\Role::find(2); // Registration Admin
         if ($role2) {
-            $role2->permissions()->sync(\App\Models\Permission::whereIn('slug', ['admin.queue', 'admin.reports'])->get());
+            $role2->permissions()->sync(
+                \App\Models\Permission::whereIn('slug', ['admin.dashboard', 'admin.queue'])->get()
+            );
         }
 
         $role1 = \App\Models\Role::find(1); // Student

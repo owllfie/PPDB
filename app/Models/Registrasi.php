@@ -30,6 +30,7 @@ class Registrasi extends Model
         'akta_lahir',
         'sekolah_asal',
         'nilai_rapor',
+        'nilai_tes',
         'no_hp',
         'email',
         'status',

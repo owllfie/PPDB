@@ -164,7 +164,7 @@ class AdminController extends Controller
         $this->adminService->logActivity(Auth::id(), "Approved registration: {$registrasi->nama_lengkap}", $request->ip());
 
         $this->discordService->sendNotification(
-            '✅ Registration Approved',
+            'Registration Approved',
             "Admin **" . Auth::user()->username . "** has **approved** the registration for **{$registrasi->nama_lengkap}**.",
             3066993, // Green
             [
@@ -176,6 +176,25 @@ class AdminController extends Controller
         return back()->with('success', 'Pendaftaran disetujui.');
     }
 
+    public function uncertainRegistration(Request $request, int $id)
+    {
+        $registrasi = \App\Models\Registrasi::findOrFail($id);
+        $this->adminService->uncertainRegistration($registrasi);
+        $this->adminService->logActivity(Auth::id(), "Registration uncertain: {$registrasi->nama_lengkap}", $request->ip());
+
+        $this->discordService->sendNotification(
+            'Registration Uncertain',
+            "Admin **" . Auth::user()->username . "** has marked the registration for **{$registrasi->nama_lengkap}** as uncertain.",
+            16776960, // Yellow
+            [
+                ['name' => 'NISN', 'value' => $registrasi->nisn, 'inline' => true],
+                ['name' => 'Nama', 'value' => $registrasi->nama_lengkap, 'inline' => true]
+            ]
+        );
+
+        return back()->with('success', 'Pendaftaran ditandai sebagai ragu-ragu.');
+    }
+
     public function rejectRegistration(Request $request, int $id)
     {
         $registrasi = \App\Models\Registrasi::findOrFail($id);
@@ -183,7 +202,7 @@ class AdminController extends Controller
         $this->adminService->logActivity(Auth::id(), "Rejected registration: {$registrasi->nama_lengkap}", $request->ip());
 
         $this->discordService->sendNotification(
-            '❌ Registration Rejected',
+            'Registration Rejected',
             "Admin **" . Auth::user()->username . "** has **rejected** the registration for **{$registrasi->nama_lengkap}**.",
             15158332, // Red
             [

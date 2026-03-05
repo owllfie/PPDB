@@ -79,6 +79,12 @@
                                             Approve
                                         </button>
                                     </form>
+                                    <form action="{{ route('admin.queue.uncertain', $reg->id_registrasi) }}" method="POST" class="inline">
+                                        @csrf
+                                        <button type="submit" class="px-3 py-1.5 text-xs font-medium text-yellow-600 bg-yellow-50 rounded-lg hover:bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/30 dark:hover:bg-v-900/50 transition-colors">
+                                            Uncertain
+                                        </button>
+                                    </form>
                                     <form action="{{ route('admin.queue.reject', $reg->id_registrasi) }}" method="POST" class="inline" onsubmit="return confirm('Tolak pendaftaran ini?')">
                                         @csrf
                                         <button type="submit" class="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 dark:text-red-400 dark:bg-red-900/30 dark:hover:bg-red-900/50 transition-colors">
