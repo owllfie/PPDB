@@ -281,6 +281,11 @@ class AdminService
         ]);
     }
 
+    public function uncertainRegistration(Registrasi $registrasi): void
+    {
+        $registrasi->update(['status' => 'uncertain']);
+    }
+
     public function getActivityLogs(?string $search = null, string $sort = 'created_at', string $order = 'desc')
     {
         $query = ActivityLog::with('user');
@@ -382,6 +387,10 @@ class AdminService
                 $rejectedTrend[$date->format('M Y')] = Registrasi::whereYear('created_at', $year)
                     ->whereMonth('created_at', $month)
                     ->where('status', 'rejected')->count();
+
+                $uncertainTrend[$date->format('M Y')] = Registrasi::whereYear('created_at', $year)
+                    ->whereMonth('created_at', $month)
+                    ->where('status', 'uncertain')->count();
             }
         }
 

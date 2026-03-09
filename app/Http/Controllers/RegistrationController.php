@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Registrasi;
+use App\Models\DetailRegistrasi;
 use App\Models\Jurusan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use App\Services\AdminService;
+use Illuminate\Support\Facades\Schema;
 
 class RegistrationController extends Controller
 {

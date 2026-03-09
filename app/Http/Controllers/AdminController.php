@@ -226,6 +226,25 @@ class AdminController extends Controller
         return redirect()->route('admin.queue', ['status' => 'approved'])->with('success', 'Pendaftaran disetujui.');
     }
 
+    public function uncertainRegistration(Request $request, int $id)
+    {
+        $registrasi = \App\Models\Registrasi::findOrFail($id);
+        $this->adminService->uncertainRegistration($registrasi);
+        $this->adminService->logActivity(Auth::id(), "Registration uncertain: {$registrasi->nama_lengkap}", $request->ip());
+
+        $this->discordService->sendNotification(
+            'Registration Uncertain',
+            "Admin **" . Auth::user()->username . "** has marked the registration for **{$registrasi->nama_lengkap}** as uncertain.",
+            16776960, // Yellow
+            [
+                ['name' => 'NISN', 'value' => $registrasi->nisn, 'inline' => true],
+                ['name' => 'Nama', 'value' => $registrasi->nama_lengkap, 'inline' => true]
+            ]
+        );
+
+        return back()->with('success', 'Pendaftaran ditandai sebagai ragu-ragu.');
+    }
+
     public function rejectRegistration(Request $request, int $id)
     {
         $registrasi = Registrasi::findOrFail($id);

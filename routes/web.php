@@ -68,6 +68,7 @@ Route::middleware(['auth', 'verified.email'])->group(function () {
         Route::get('/admin/queue', [AdminController::class, 'queue'])->name('admin.queue');
         Route::get('/admin/tests', [AdminController::class, 'tests'])->name('admin.tests');
         Route::post('/admin/queue/{id}/approve', [AdminController::class, 'approveRegistration'])->name('admin.queue.approve');
+        Route::post('/admin/queue/{id}/uncertain', [AdminController::class, 'uncertainRegistration'])->name('admin.queue.uncertain');
         Route::post('/admin/queue/{id}/reject', [AdminController::class, 'rejectRegistration'])->name('admin.queue.reject');
         Route::post('/admin/tests/{id}/pass', [AdminController::class, 'passTestCandidate'])->name('admin.tests.pass');
         Route::post('/admin/tests/{id}/uncertain', [AdminController::class, 'setTestCandidateUncertain'])->name('admin.tests.uncertain');
