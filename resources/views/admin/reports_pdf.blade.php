@@ -17,6 +17,7 @@
         .status-badge { display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
         .status-approved { background-color: #dcfce7; color: #15803d; }
         .status-rejected { background-color: #fee2e2; color: #b91c1c; }
+        .status-uncertain { background-color: #fef3c7; color: #b45309; }
         .status-pending { background-color: #fef9c3; color: #a16207; }
         .footer { margin-top: 40px; text-align: right; font-size: 11px; color: #9ca3af; border-top: 1px solid #eee; padding-top: 10px; }
     </style>
@@ -50,7 +51,7 @@
                     <td style="font-weight: bold;">{{ $reg->nama_lengkap }}</td>
                     <td>{{ $reg->created_at->format('d/m/Y H:i') }}</td>
                     <td>
-                        <span class="status-badge {{ $reg->status === 'approved' ? 'status-approved' : ($reg->status === 'rejected' ? 'status-rejected' : 'status-pending') }}">
+                        <span class="status-badge {{ $reg->status === 'approved' ? 'status-approved' : ($reg->status === 'rejected' ? 'status-rejected' : ($reg->status === 'uncertain' ? 'status-uncertain' : 'status-pending')) }}">
                             {{ strtoupper($reg->status) }}
                         </span>
                     </td>

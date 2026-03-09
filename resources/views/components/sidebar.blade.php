@@ -24,6 +24,21 @@
                   <span class="ml-3">Registration Form</span>
                </a>
             </li>
+            <li>
+               <a href="{{ route('user.inbox') }}" class="flex items-center justify-between p-2.5 rounded-lg transition-colors {{ request()->routeIs('user.inbox') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                  <span class="flex items-center">
+                     <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z"/>
+                     </svg>
+                     <span class="ml-3">Inbox</span>
+                  </span>
+                  @if(($unreadInboxCount ?? 0) > 0)
+                     <span class="ml-3 inline-flex min-w-6 items-center justify-center rounded-full bg-rose-500 px-2 py-0.5 text-xs font-semibold text-white">
+                        {{ $unreadInboxCount }}
+                     </span>
+                  @endif
+               </a>
+            </li>
          @endif
 
          @if($userRole && ($userRole->hasPermission('admin.users') || $userRole->hasPermission('admin.queue') || $userRole->hasPermission('admin.reports')))
@@ -47,6 +62,14 @@
                      <path d="M5 3a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H5ZM5 11a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2H5ZM11 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V5ZM11 13a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-2Z"/>
                   </svg>
                   <span class="ml-3">Registration Queue</span>
+               </a>
+            </li>
+            <li>
+               <a href="{{ route('admin.tests') }}" class="flex items-center p-2.5 rounded-lg transition-colors {{ request()->routeIs('admin.tests') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                  <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                     <path d="M19 3H5a2 2 0 0 0-2 2v14l4-3h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-7 10H8v-2h4v2zm4-4H8V7h8v2z"/>
+                  </svg>
+                  <span class="ml-3">Test Review</span>
                </a>
             </li>
             @endif

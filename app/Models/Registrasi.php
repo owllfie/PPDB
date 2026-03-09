@@ -11,34 +11,19 @@ class Registrasi extends Model
 
     protected $fillable = [
         'id_user',
-        'id_jurusan',
         'nisn',
-        'nama_lengkap',
-        'nik',
-        'tempat_lahir',
-        'tanggal_lahir',
-        'jenis_kelamin',
-        'agama',
-        'anak_ke-',
-        'alamat_lengkap',
-        'nama_ayah',
-        'nama_ibu',
-        'pekerjaan_ayah',
-        'pekerjaan_ibu',
-        'kk',
-        'ijazah',
-        'akta_lahir',
-        'sekolah_asal',
         'nilai_rapor',
-        'no_hp',
-        'email',
+        'nilai_tes',
         'status',
+        'current_stage',
+        'selection_status',
+        'test_access_token',
+        're_registration_token',
     ];
 
-    protected function casts(): array
+    public function tests()
     {
-        return [
-            'tanggal_lahir' => 'date',
-        ];
+        return $this->hasMany(AdmissionTest::class, 'id_registrasi', 'id_registrasi');
     }
+
 }

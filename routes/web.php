@@ -7,6 +7,8 @@ use App\Http\Controllers\VerifyEmailController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\BackupController;
+use App\Http\Controllers\InboxController;
+use App\Http\Controllers\AdmissionController;
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -43,6 +45,11 @@ Route::middleware(['auth', 'verified.email'])->group(function () {
     Route::middleware('permission:user.register')->group(function () {
         Route::get('/registration', [\App\Http\Controllers\RegistrationController::class, 'create'])->name('user.register.form');
         Route::post('/registration', [\App\Http\Controllers\RegistrationController::class, 'store'])->name('user.register.store');
+        Route::get('/inbox', [InboxController::class, 'index'])->name('user.inbox');
+        Route::get('/admission/test/{token}', [AdmissionController::class, 'showTest'])->name('user.test.show');
+        Route::post('/admission/test/{token}', [AdmissionController::class, 'submitTest'])->name('user.test.submit');
+        Route::get('/admission/reregister/{token}', [AdmissionController::class, 'showReRegistration'])->name('user.reregister.show');
+        Route::post('/admission/reregister/{token}', [AdmissionController::class, 'submitReRegistration'])->name('user.reregister.submit');
     });
 
     // User Management
@@ -59,8 +66,15 @@ Route::middleware(['auth', 'verified.email'])->group(function () {
     // Registration Queue & Reports
     Route::middleware('permission:admin.queue')->group(function () {
         Route::get('/admin/queue', [AdminController::class, 'queue'])->name('admin.queue');
+        Route::get('/admin/tests', [AdminController::class, 'tests'])->name('admin.tests');
         Route::post('/admin/queue/{id}/approve', [AdminController::class, 'approveRegistration'])->name('admin.queue.approve');
         Route::post('/admin/queue/{id}/reject', [AdminController::class, 'rejectRegistration'])->name('admin.queue.reject');
+        Route::post('/admin/tests/{id}/pass', [AdminController::class, 'passTestCandidate'])->name('admin.tests.pass');
+        Route::post('/admin/tests/{id}/uncertain', [AdminController::class, 'setTestCandidateUncertain'])->name('admin.tests.uncertain');
+        Route::post('/admin/tests/{id}/fail', [AdminController::class, 'failTestCandidate'])->name('admin.tests.fail');
+        Route::get('/admin/queue/{id}/document/{type}', [AdminController::class, 'viewRegistrationDocument'])
+            ->whereIn('type', ['kk', 'ijazah', 'akta_lahir'])
+            ->name('admin.queue.document');
     });
 
     Route::middleware('permission:admin.reports')->group(function () {

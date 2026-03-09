@@ -107,8 +107,9 @@
                             <td class="px-6 py-4 text-sm">
                                 <span class="px-3 py-1 text-xs font-bold rounded-full
                                     {{ $reg->status === 'approved' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 
-                                       ($reg->status === 'rejected' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 
-                                       'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400') }}">
+                                       ($reg->status === 'rejected' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                                       ($reg->status === 'uncertain' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                                       'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400')) }}">
                                     {{ ucfirst($reg->status) }}
                                 </span>
                             </td>

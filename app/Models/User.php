@@ -43,4 +43,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class, 'role', 'id_role');
     }
+
+    public function inboxMessages()
+    {
+        return $this->hasMany(UserInbox::class, 'id_user', 'id_user');
+    }
 }

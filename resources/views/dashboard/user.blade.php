@@ -7,7 +7,7 @@
 
     <div class="mb-10 text-center">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Selamat Datang di Portal Pendaftaran</h1>
-        <p class="mt-2 text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">Panduan lengkap untuk mendaftar sebagai siswa baru. Ikuti langkah-langkah di bawah ini.</p>
+        <p class="mt-2 text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">Alur pendaftaran sekarang terdiri dari verifikasi berkas, tes masuk, seleksi akhir, lalu daftar ulang untuk calon siswa yang lulus.</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 max-w-6xl mx-auto">
@@ -49,15 +49,15 @@
                 <span class="text-xl font-bold text-purple-600 dark:text-purple-400">5</span>
             </div>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Tunggu Verifikasi</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Tim admin akan memverifikasi dokumen dan data Anda. Pantau status pendaftaran di halaman ini.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Tim sekolah akan meninjau data Anda. Jika disetujui, link tes masuk akan dikirim ke inbox akun Anda.</p>
         </div>
 
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-6 hover:shadow-xl transition-shadow">
             <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-100 dark:bg-cyan-900/40 mb-4">
                 <span class="text-xl font-bold text-cyan-600 dark:text-cyan-400">6</span>
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Selesai</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Setelah diterima, Anda akan menerima notifikasi. Selamat bergabung sebagai siswa baru!</p>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Tes, Seleksi, Daftar Ulang</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Kerjakan tes jika mendapat link, tunggu hasil seleksi akhir, lalu lakukan daftar ulang bila dinyatakan lulus.</p>
         </div>
 
     </div>
@@ -71,7 +71,7 @@
             </div>
             <div>
                 <h4 class="text-sm font-semibold text-indigo-800 dark:text-indigo-300">Informasi Penting</h4>
-                <p class="mt-1 text-sm text-indigo-700 dark:text-indigo-400">Pastikan semua dokumen yang diunggah asli dan dapat diverifikasi. Data yang tidak valid akan menyebabkan pendaftaran ditolak.</p>
+                <p class="mt-1 text-sm text-indigo-700 dark:text-indigo-400">Pantau inbox Anda secara berkala. Link tes masuk dan link daftar ulang hanya dikirim ke siswa yang lolos pada tahap sebelumnya.</p>
             </div>
         </div>
     </div>

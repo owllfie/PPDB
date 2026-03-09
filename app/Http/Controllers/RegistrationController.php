@@ -6,6 +6,8 @@ use App\Models\Registrasi;
 use App\Models\Jurusan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use App\Services\AdminService;
 
 class RegistrationController extends Controller
@@ -57,8 +59,49 @@ class RegistrationController extends Controller
             }
         }
 
-        $validated['id_user'] = Auth::id();
-        Registrasi::create($validated);
+        DB::transaction(function () use ($validated) {
+            $registrasiData = [
+                'id_user' => Auth::id(),
+                'nisn' => $validated['nisn'],
+                'nilai_rapor' => $validated['nilai_rapor'],
+                'nilai_tes' => 0,
+                'status' => 'pending',
+            ];
+
+            if (Schema::hasColumn('registrasi', 'nama_lengkap')) {
+                $registrasiData['nama_lengkap'] = $validated['nama_lengkap'];
+            }
+
+            $registrasi = Registrasi::create($registrasiData);
+
+            $detailData = [
+                'id_registrasi' => $registrasi->id_registrasi,
+                'nik' => $validated['nik'],
+                'tempat_lahir' => $validated['tempat_lahir'],
+                'tanggal_lahir' => $validated['tanggal_lahir'],
+                'jenis_kelamin' => $validated['jenis_kelamin'],
+                'agama' => $validated['agama'],
+                'anak_ke-' => $validated['anak_ke-'],
+                'alamat_lengkap' => $validated['alamat_lengkap'],
+                'no_hp' => $validated['no_hp'],
+                'email' => $validated['email'],
+                'nama_ayah' => $validated['nama_ayah'],
+                'nama_ibu' => $validated['nama_ibu'],
+                'pekerjaan_ayah' => $validated['pekerjaan_ayah'],
+                'pekerjaan_ibu' => $validated['pekerjaan_ibu'],
+                'sekolah_asal' => $validated['sekolah_asal'],
+                'id_jurusan' => $validated['id_jurusan'],
+                'kk' => $validated['kk'] ?? '',
+                'ijazah' => $validated['ijazah'] ?? '',
+                'akta_lahir' => $validated['akta_lahir'] ?? '',
+            ];
+
+            if (Schema::hasColumn('detail_registrasi', 'nama_lengkap')) {
+                $detailData['nama_lengkap'] = $validated['nama_lengkap'];
+            }
+
+            DB::table('detail_registrasi')->insert($detailData);
+        });
 
         $this->adminService->logActivity(Auth::id(), 'Submitted new registration for: ' . $validated['nama_lengkap'], $request->ip());
 

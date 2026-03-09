@@ -4,10 +4,30 @@
 
 @section('content')
 <div class="px-4 pt-6 pb-8">
+    @php
+        $tabLabels = [
+            'pending' => 'Pending Queue',
+            'approved' => 'Approved',
+            'rejected' => 'Rejected',
+        ];
+        $currentStatus = $currentStatus ?? 'pending';
+        $isActionableTab = $currentStatus === 'pending';
+    @endphp
 
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Registration Queue</h1>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Approve or reject incoming student registrations</p>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Verifikasi berkas pendaftaran. Siswa yang disetujui akan menerima link tes di inbox.</p>
+    </div>
+
+    <div class="mb-6 flex flex-wrap gap-2">
+        @foreach($tabLabels as $statusKey => $statusLabel)
+            <a
+                href="{{ route('admin.queue', array_merge(request()->except('page'), ['status' => $statusKey])) }}"
+                class="px-4 py-2 text-sm font-medium rounded-xl border transition-colors {{ $currentStatus === $statusKey ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700' }}"
+            >
+                {{ $statusLabel }}
+            </a>
+        @endforeach
     </div>
 
     <div class="mb-4 flex justify-between items-center gap-4">
@@ -73,18 +93,24 @@
                                     <button onclick="document.getElementById('detail-modal-{{ $reg->id_registrasi }}').classList.remove('hidden')" class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
                                         Detail
                                     </button>
-                                    <form action="{{ route('admin.queue.approve', $reg->id_registrasi) }}" method="POST" class="inline">
-                                        @csrf
-                                        <button type="submit" class="px-3 py-1.5 text-xs font-medium text-green-600 bg-green-50 rounded-lg hover:bg-green-100 dark:text-green-400 dark:bg-green-900/30 dark:hover:bg-green-900/50 transition-colors">
-                                            Approve
-                                        </button>
-                                    </form>
-                                    <form action="{{ route('admin.queue.reject', $reg->id_registrasi) }}" method="POST" class="inline" onsubmit="return confirm('Tolak pendaftaran ini?')">
-                                        @csrf
-                                        <button type="submit" class="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 dark:text-red-400 dark:bg-red-900/30 dark:hover:bg-red-900/50 transition-colors">
-                                            Reject
-                                        </button>
-                                    </form>
+                                    @if($isActionableTab)
+                                        <form action="{{ route('admin.queue.approve', $reg->id_registrasi) }}" method="POST" class="inline">
+                                            @csrf
+                                            <button type="submit" class="px-3 py-1.5 text-xs font-medium text-green-600 bg-green-50 rounded-lg hover:bg-green-100 dark:text-green-400 dark:bg-green-900/30 dark:hover:bg-green-900/50 transition-colors">
+                                                Approve
+                                            </button>
+                                        </form>
+                                        <form action="{{ route('admin.queue.reject', $reg->id_registrasi) }}" method="POST" class="inline" onsubmit="return confirm('Tolak pendaftaran ini?')">
+                                            @csrf
+                                            <button type="submit" class="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 dark:text-red-400 dark:bg-red-900/30 dark:hover:bg-red-900/50 transition-colors">
+                                                Reject
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="px-3 py-1.5 text-xs font-medium rounded-lg {{ $currentStatus === 'approved' ? 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/30' : 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/30' }}">
+                                            {{ ucfirst($currentStatus) }}
+                                        </span>
+                                    @endif
                                 </div>
 
                                 <div id="detail-modal-{{ $reg->id_registrasi }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -101,10 +127,10 @@
                                             <div><span class="font-medium text-gray-700 dark:text-gray-300">Nama:</span> <span class="text-gray-900 dark:text-white">{{ $reg->nama_lengkap }}</span></div>
                                             <div><span class="font-medium text-gray-700 dark:text-gray-300">Email:</span> <span class="text-gray-900 dark:text-white">{{ $reg->email }}</span></div>
                                             <div><span class="font-medium text-gray-700 dark:text-gray-300">Tempat Lahir:</span> <span class="text-gray-900 dark:text-white">{{ $reg->tempat_lahir }}</span></div>
-                                            <div><span class="font-medium text-gray-700 dark:text-gray-300">Tanggal Lahir:</span> <span class="text-gray-900 dark:text-white">{{ $reg->tanggal_lahir?->format('d M Y') }}</span></div>
+                                            <div><span class="font-medium text-gray-700 dark:text-gray-300">Tanggal Lahir:</span> <span class="text-gray-900 dark:text-white">{{ $reg->tanggal_lahir ? \Carbon\Carbon::parse($reg->tanggal_lahir)->format('d M Y') : '-' }}</span></div>
                                             <div><span class="font-medium text-gray-700 dark:text-gray-300">Jenis Kelamin:</span> <span class="text-gray-900 dark:text-white">{{ $reg->jenis_kelamin }}</span></div>
                                             <div><span class="font-medium text-gray-700 dark:text-gray-300">Agama:</span> <span class="text-gray-900 dark:text-white">{{ $reg->agama }}</span></div>
-                                            <div><span class="font-medium text-gray-700 dark:text-gray-300">Anak Ke:</span> <span class="text-gray-900 dark:text-white">{{ $reg->{'anak_ke-'} }}</span></div>
+                                            <div><span class="font-medium text-gray-700 dark:text-gray-300">Anak Ke:</span> <span class="text-gray-900 dark:text-white">{{ $reg->anak_ke }}</span></div>
                                             <div><span class="font-medium text-gray-700 dark:text-gray-300">No HP:</span> <span class="text-gray-900 dark:text-white">{{ $reg->no_hp }}</span></div>
                                             <div class="col-span-2"><span class="font-medium text-gray-700 dark:text-gray-300">Alamat:</span> <span class="text-gray-900 dark:text-white">{{ $reg->alamat_lengkap }}</span></div>
                                             <div><span class="font-medium text-gray-700 dark:text-gray-300">Nama Ayah:</span> <span class="text-gray-900 dark:text-white">{{ $reg->nama_ayah }}</span></div>
@@ -114,13 +140,45 @@
                                             <div><span class="font-medium text-gray-700 dark:text-gray-300">Sekolah Asal:</span> <span class="text-gray-900 dark:text-white">{{ $reg->sekolah_asal }}</span></div>
                                             <div><span class="font-medium text-gray-700 dark:text-gray-300">Nilai Rapor:</span> <span class="text-gray-900 dark:text-white">{{ $reg->nilai_rapor }}</span></div>
                                         </div>
+                                        <div class="mt-6">
+                                            <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Dokumen</h4>
+                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                @foreach (['kk' => 'KK', 'ijazah' => 'Ijazah', 'akta_lahir' => 'Akta Lahir'] as $docField => $docLabel)
+                                                    <div class="rounded-xl border border-gray-200 dark:border-gray-700 p-3">
+                                                        <p class="text-xs font-medium text-gray-600 dark:text-gray-300 mb-2">{{ $docLabel }}</p>
+                                                        @php
+                                                            $docPath = $reg->{$docField};
+                                                            $docExt = strtolower(pathinfo((string) $docPath, PATHINFO_EXTENSION));
+                                                            $isImage = in_array($docExt, ['jpg', 'jpeg', 'png', 'webp', 'gif']);
+                                                        @endphp
+
+                                                        @if($docPath)
+                                                            <a href="{{ route('admin.queue.document', ['id' => $reg->id_registrasi, 'type' => $docField]) }}" target="_blank" class="block">
+                                                                @if($isImage)
+                                                                    <img
+                                                                        src="{{ route('admin.queue.document', ['id' => $reg->id_registrasi, 'type' => $docField]) }}"
+                                                                        alt="{{ $docLabel }}"
+                                                                        class="w-full h-28 object-cover rounded-lg border border-gray-100 dark:border-gray-600"
+                                                                    >
+                                                                @endif
+                                                            </a>
+                                                            <a href="{{ route('admin.queue.document', ['id' => $reg->id_registrasi, 'type' => $docField]) }}" target="_blank" class="inline-flex items-center mt-2 px-3 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 rounded-lg dark:text-indigo-300 dark:bg-indigo-900/30">
+                                                                Lihat File
+                                                            </a>
+                                                        @else
+                                                            <p class="text-xs text-gray-400">Belum ada file</p>
+                                                        @endif
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Tidak ada pendaftaran baru.</td>
+                            <td colspan="7" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Tidak ada data pada tab {{ strtolower($tabLabels[$currentStatus] ?? 'queue') }}.</td>
                         </tr>
                     @endforelse
                 </tbody>
