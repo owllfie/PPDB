@@ -50,7 +50,9 @@ class AdminService
                 'detail.id_jurusan',
                 'detail.kk',
                 'detail.ijazah',
-                'detail.akta_lahir'
+                'detail.akta_lahir',
+                'detail.rapor',
+                'detail.pas_foto'
             );
 
         if (Schema::hasColumn('detail_registrasi', 'nama_lengkap')) {

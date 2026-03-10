@@ -19,6 +19,8 @@ class Registrasi extends Model
         'selection_status',
         'test_access_token',
         're_registration_token',
+        'rapor',
+        'pas_foto',
     ];
 
     public function tests()

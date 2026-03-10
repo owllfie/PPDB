@@ -38,7 +38,15 @@ class AuthController extends Controller
 
     public function register(RegisterRequest $request)
     {
-        $user = $this->authService->registerUser($request->validated());
+        $data = $request->validated();
+        $files = ['kk', 'ijazah', 'akta_lahir', 'rapor', 'pas_foto'];
+        foreach ($files as $field) {
+            if ($request->hasFile($field)) {
+                $data[$field] = $request->file($field)->store('registration_docs', 'public');
+            }
+        }
+
+        $user = $this->authService->registerUser($data);
 
         Auth::login($user);
 

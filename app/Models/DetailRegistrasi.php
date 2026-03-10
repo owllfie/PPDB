@@ -30,5 +30,7 @@ class DetailRegistrasi extends Model
         'kk',
         'ijazah',
         'akta_lahir',
+        'rapor',
+        'pas_foto',
     ];
 }

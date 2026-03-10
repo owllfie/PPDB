@@ -143,7 +143,7 @@
                                         <div class="mt-6">
                                             <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Dokumen</h4>
                                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                                @foreach (['kk' => 'KK', 'ijazah' => 'Ijazah', 'akta_lahir' => 'Akta Lahir'] as $docField => $docLabel)
+                                                @foreach (['kk' => 'KK', 'ijazah' => 'Ijazah', 'akta_lahir' => 'Akta Lahir', 'rapor' => 'Rapor', 'pas_foto' => 'Pas Foto'] as $docField => $docLabel)
                                                     <div class="rounded-xl border border-gray-200 dark:border-gray-700 p-3">
                                                         <p class="text-xs font-medium text-gray-600 dark:text-gray-300 mb-2">{{ $docLabel }}</p>
                                                         @php
