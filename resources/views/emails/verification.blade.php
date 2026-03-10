@@ -73,7 +73,7 @@
             <h1>Verify Your Email</h1>
         </div>
         <div class="body">
-            <p>Hello <strong style="color:#e2e8f0;">{{ $username }}</strong>,</p>
+            <p>Hello <strong style="color:#e2e8f0;">{{ $name }}</strong>,</p>
             <p>Use the following OTP code to verify your email address. This code will expire in <strong style="color:#e2e8f0;">10 minutes</strong>.</p>
             <div class="otp-box">
                 <span class="otp-code">{{ $otp }}</span>

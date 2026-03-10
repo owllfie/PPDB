@@ -70,21 +70,22 @@ class DummyRegistrationSeeder extends Seeder
                     $fullName = self::STUDENT_NAMES[$counter - 1];
                     $emailHandle = strtolower(str_replace(' ', '.', $fullName));
                     $email = "{$emailHandle}.{$status}@example.test";
+                    $nisn = '2026' . str_pad((string) $counter, 6, '0', STR_PAD_LEFT);
+                    $noHp = '08123' . str_pad((string) (450000 + $counter), 6, '0', STR_PAD_LEFT);
                     $userId = DB::table('users')->insertGetId([
-                        'username' => strtolower(str_replace(' ', '', $fullName)) . $studentNumber,
+                        'nisn' => $nisn,
+                        'nama_lengkap' => $fullName,
                         'email' => $email,
-                        'password' => Hash::make('password123'),
+                        'no_hp' => $noHp,
+                        'password' => Hash::make($nisn),
                         'role' => 1,
-                        'is_verified' => true,
-                        'otp_code' => null,
-                        'otp_expires_at' => null,
                         'created_at' => $createdAt,
                         'updated_at' => $createdAt,
                     ]);
 
                     $registrasiId = DB::table('registrasi')->insertGetId([
                         'id_user' => $userId,
-                        'nisn' => '2026' . str_pad((string) $counter, 6, '0', STR_PAD_LEFT),
+                        'nisn' => $nisn,
                         'nilai_rapor' => 72 + ($counter % 23),
                         'nilai_tes' => 68 + (($counter * 3) % 29),
                         'status' => $status,
@@ -102,7 +103,7 @@ class DummyRegistrationSeeder extends Seeder
                         'agama' => ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha'][$counter % 5],
                         'anak_ke-' => ($counter % 3) + 1,
                         'alamat_lengkap' => "Jl. Contoh Siswa No. {$counter}, Kecamatan Maju, Kota Belajar",
-                        'no_hp' => '08123' . str_pad((string) (450000 + $counter), 6, '0', STR_PAD_LEFT),
+                        'no_hp' => $noHp,
                         'email' => $email,
                         'nama_ayah' => self::FATHER_NAMES[$counter % count(self::FATHER_NAMES)],
                         'nama_ibu' => self::MOTHER_NAMES[$counter % count(self::MOTHER_NAMES)],

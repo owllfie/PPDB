@@ -15,9 +15,30 @@
         <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-5 text-sm text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-300">
             Tes ini sudah Anda kirim. Silakan tunggu keputusan sekolah melalui inbox.
         </div>
+        <div class="mt-4 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Jurusan Dipilih</h2>
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+                {{ $jurusans->firstWhere('id_jurusan', $test->id_jurusan)->nama_jurusan ?? '-' }}
+            </p>
+        </div>
     @else
         <form action="{{ route('user.test.submit', $test->token) }}" method="POST" class="space-y-6">
             @csrf
+
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-6">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Pilih Jurusan</h2>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Jurusan</label>
+                    <select name="id_jurusan" required class="w-full rounded-xl border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white px-4 py-3">
+                        <option value="" disabled {{ old('id_jurusan', $test->id_jurusan) ? '' : 'selected' }}>Pilih jurusan</option>
+                        @foreach($jurusans as $jurusan)
+                            <option value="{{ $jurusan->id_jurusan }}" {{ (string) old('id_jurusan', $test->id_jurusan) === (string) $jurusan->id_jurusan ? 'selected' : '' }}>
+                                {{ $jurusan->nama_jurusan }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
 
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-6">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Tes Kemampuan Dasar</h2>

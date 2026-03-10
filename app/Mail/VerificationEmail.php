@@ -15,12 +15,12 @@ class VerificationEmail extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
 
     public string $otp;
-    public string $username;
+    public string $name;
 
     public function __construct(User $user, string $otp)
     {
         $this->otp = $otp;
-        $this->username = $user->username;
+        $this->name = $user->nama_lengkap ?? $user->email ?? 'User';
     }
 
     public function envelope(): Envelope

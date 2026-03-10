@@ -12,6 +12,7 @@ class Registrasi extends Model
     protected $fillable = [
         'id_user',
         'nisn',
+        'id_jurusan',
         'nilai_rapor',
         'nilai_tes',
         'status',
@@ -21,6 +22,7 @@ class Registrasi extends Model
         're_registration_token',
         'rapor',
         'pas_foto',
+        'recommended_jurusan_id',
     ];
 
     public function tests()

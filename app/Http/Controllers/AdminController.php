@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AdmissionTest;
 use App\Models\Registrasi;
+use App\Models\User;
 use App\Services\AdminService;
 use App\Services\DiscordService;
 use Illuminate\Http\Request;
@@ -11,10 +12,20 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Role;
 use App\Models\Permission;
+use App\Models\Jurusan;
+use App\Mail\AdmissionTokenMail;
+use App\Mail\AdmissionRejectedMail;
+use App\Mail\TestPassedMail;
+use App\Mail\TestFailedMail;
+use App\Mail\TestUncertainMail;
+use App\Mail\RegistrationApprovedMail;
+use App\Mail\RegistrationRejectedMail;
 
 class AdminController extends Controller
 {
@@ -61,11 +72,13 @@ class AdminController extends Controller
         }
 
         $this->adminService->resetPassword($user, $request->password);
-        $this->adminService->logActivity(Auth::id(), "Reset password for user: {$user->username}", $request->ip());
+        $userName = $this->resolveUserName($user);
+        $adminName = $this->resolveUserName(Auth::user());
+        $this->adminService->logActivity(Auth::id(), "Reset password for user: {$userName}", $request->ip());
 
         $this->discordService->sendNotification(
             '🔐 Password Reset',
-            "Admin **" . Auth::user()->username . "** has reset the password for user **{$user->username}**.",
+            "Admin **{$adminName}** has reset the password for user **{$userName}**.",
             15105570 // Orange
         );
 
@@ -89,11 +102,13 @@ class AdminController extends Controller
         $user->load('roleRelation');
         $newRole = $user->roleRelation->role_name ?? "Role ID: {$request->role}";
 
-        $this->adminService->logActivity(Auth::id(), "Changed role for user: {$user->username} from {$oldRole} to {$newRole}", $request->ip());
+        $userName = $this->resolveUserName($user);
+        $adminName = $this->resolveUserName(Auth::user());
+        $this->adminService->logActivity(Auth::id(), "Changed role for user: {$userName} from {$oldRole} to {$newRole}", $request->ip());
 
         $this->discordService->sendNotification(
             '🔄 Role Changed',
-            "Admin **" . Auth::user()->username . "** changed the role of **{$user->username}**.",
+            "Admin **{$adminName}** changed the role of **{$userName}**.",
             15844367, // Gold
             [
                 ['name' => 'Old Role', 'value' => $oldRole, 'inline' => true],
@@ -112,13 +127,13 @@ class AdminController extends Controller
             abort(403, 'Anda tidak dapat menghapus akun administrator dengan hak akses tinggi.');
         }
 
-        $username = $user->username;
+        $userName = $this->resolveUserName($user);
         $this->adminService->deleteUser($user);
-        $this->adminService->logActivity(Auth::id(), "Deleted user: {$username}", $request->ip());
+        $this->adminService->logActivity(Auth::id(), "Deleted user: {$userName}", $request->ip());
 
         $this->discordService->sendNotification(
             '🗑️ User Deleted',
-            "Admin **" . Auth::user()->username . "** has deleted the user account for **{$username}**.",
+            "Admin **" . $this->resolveUserName(Auth::user()) . "** has deleted the user account for **{$userName}**.",
             15158332 // Red
         );
 
@@ -129,7 +144,7 @@ class AdminController extends Controller
     {
         $this->adminService->restoreUser($id);
         $user = \App\Models\User::findOrFail($id);
-        $this->adminService->logActivity(Auth::id(), "Restored user: {$user->username}", $request->ip());
+        $this->adminService->logActivity(Auth::id(), "Restored user: {$this->resolveUserName($user)}", $request->ip());
 
         return back()->with('success', 'Akun berhasil dipulihkan.');
     }
@@ -137,9 +152,9 @@ class AdminController extends Controller
     public function forceDeleteUser(Request $request, int $id)
     {
         $user = \App\Models\User::withTrashed()->findOrFail($id);
-        $username = $user->username;
+        $userName = $this->resolveUserName($user);
         $this->adminService->forceDeleteUser($id);
-        $this->adminService->logActivity(Auth::id(), "Permanently deleted user: {$username}", $request->ip());
+        $this->adminService->logActivity(Auth::id(), "Permanently deleted user: {$userName}", $request->ip());
 
         return back()->with('success', 'Akun berhasil dihapus secara permanen.');
     }
@@ -169,20 +184,29 @@ class AdminController extends Controller
         $tests = AdmissionTest::query()
             ->join('registrasi', 'registrasi.id_registrasi', '=', 'admission_tests.id_registrasi')
             ->leftJoin('detail_registrasi as detail', 'detail.id_registrasi', '=', 'registrasi.id_registrasi')
-            ->select('admission_tests.*', 'registrasi.nisn', 'registrasi.selection_status', 'registrasi.current_stage', 'detail.nama_lengkap')
+            ->leftJoin('jurusan as jurusan', 'jurusan.id_jurusan', '=', 'admission_tests.id_jurusan')
+            ->select('admission_tests.*', 'registrasi.nisn', 'registrasi.selection_status', 'registrasi.current_stage', 'detail.nama_lengkap', 'jurusan.nama_jurusan as jurusan_nama')
             ->where('admission_tests.status', 'submitted')
             ->where('registrasi.current_stage', 'test_submitted')
             ->orderByDesc('admission_tests.submitted_at')
             ->paginate(10);
 
-        return view('admin.tests', compact('tests'));
+        $jurusans = Jurusan::all();
+        return view('admin.tests', compact('tests', 'jurusans'));
     }
 
     public function viewRegistrationDocument(int $id, string $type)
     {
-        $docPath = DB::table('detail_registrasi')
-            ->where('id_registrasi', $id)
-            ->value($type);
+        $allowedDocs = ['kk', 'ijazah', 'akta_lahir', 'rapor', 'pas_foto'];
+        abort_unless(in_array($type, $allowedDocs, true), 404, 'Dokumen tidak ditemukan.');
+
+        $docPath = null;
+        if (Schema::hasTable('detail_registrasi') && Schema::hasColumn('detail_registrasi', $type)) {
+            $docPath = DB::table('detail_registrasi')->where('id_registrasi', $id)->value($type);
+        }
+        if (!$docPath && Schema::hasColumn('registrasi', $type)) {
+            $docPath = Registrasi::where('id_registrasi', $id)->value($type);
+        }
 
         abort_unless($docPath, 404, 'Dokumen tidak ditemukan.');
         abort_unless(Storage::disk('public')->exists($docPath), 404, 'File dokumen tidak ditemukan di storage.');
@@ -198,27 +222,123 @@ class AdminController extends Controller
     public function approveRegistration(Request $request, int $id)
     {
         $registrasi = Registrasi::findOrFail($id);
-        $this->adminService->approveRegistration($registrasi);
-        $namaLengkap = $this->resolveRegistrationName($registrasi);
+        $detail = Schema::hasTable('detail_registrasi')
+            ? DB::table('detail_registrasi')->where('id_registrasi', $registrasi->id_registrasi)->first()
+            : null;
+
+        $email = ($detail->email ?? null) ?: ($registrasi->email ?? null);
+        $namaLengkap = ($detail->nama_lengkap ?? null) ?: ($registrasi->nama_lengkap ?? null);
+        $noHp = ($detail->no_hp ?? null) ?: ($registrasi->no_hp ?? null);
+        $nik = ($detail->nik ?? null) ?: ($registrasi->nik ?? null);
+        $nisn = $registrasi->nisn ?? null;
+        abort_unless($email, 422, 'Email tidak ditemukan untuk pendaftaran ini.');
+        abort_unless($nisn, 422, 'NISN tidak ditemukan untuk pendaftaran ini.');
+
+        $user = User::firstOrNew(['email' => $email]);
+        if (!$user->exists) {
+            $user->password = Hash::make((string) $nisn, ['rounds' => 12]);
+        }
+        if (Schema::hasColumn('users', 'nisn')) {
+            $user->nisn = $user->nisn ?: $nisn;
+        }
+        if (Schema::hasColumn('users', 'nik')) {
+            $user->nik = $user->nik ?: $nik;
+        }
+        if (Schema::hasColumn('users', 'no_hp')) {
+            $user->no_hp = $noHp;
+        }
+        if (Schema::hasColumn('users', 'nama_lengkap')) {
+            $user->nama_lengkap = $namaLengkap;
+        }
+        if (Schema::hasColumn('users', 'role')) {
+            $user->role = 1;
+        }
+        $user->save();
+
+        $registrasi->update([
+            'status' => 'approved',
+            'current_stage' => 'test_assigned',
+        ]);
+        if (Schema::hasColumn('registrasi', 'id_user')) {
+            $registrasi->update(['id_user' => $user->id_user]);
+        }
+
+        $this->discordService->sendNotification(
+            'âœ… Registration Approved',
+            "Admin **" . $this->resolveUserName(Auth::user()) . "** has **approved** the registration for **{$namaLengkap}**.",
+            3066993,
+            [
+                ['name' => 'NISN', 'value' => $registrasi->nisn ?? '-', 'inline' => true],
+                ['name' => 'Nama', 'value' => $namaLengkap, 'inline' => true]
+            ]
+        );
+
+        $adminName = $this->resolveUserName(Auth::user());
+        if (!empty($email)) {
+            Mail::to($email)->queue(new RegistrationApprovedMail($namaLengkap ?? 'Unknown', $registrasi->nisn ?? '-', $adminName));
+        }
+
+        return redirect()->route('admin.queue', ['status' => 'approved'])->with('success', 'Pendaftaran disetujui. Akun siswa dibuat otomatis.');
+    }
+
+    public function approveRegistrationLegacy(Request $request, int $id)
+    {
+        $user = User::withTrashed()->findOrFail($id);
+        $userColumns = Schema::getColumnListing('users');
+        if (in_array('role', $userColumns, true)) {
+            $user->role = 1;
+        }
+        if (in_array('login_token_hash', $userColumns, true)) {
+            $token = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            $user->login_token_hash = Hash::make($token);
+            $user->login_token_expires_at = now()->addDays(7);
+            $user->login_token_used_at = null;
+        }
+        if (in_array('deleted_at', $userColumns, true) && $user->trashed()) {
+            $user->restore();
+        }
+        $user->save();
+
+        $registrasi = Registrasi::where('id_user', $user->id_user)->orderByDesc('id_registrasi')->first();
+        if ($registrasi) {
+            $registrasi->update([
+                'status' => 'approved',
+                'current_stage' => 'test_assigned',
+            ]);
+            $existingTest = AdmissionTest::where('id_registrasi', $registrasi->id_registrasi)
+                ->where('status', 'assigned')
+                ->first();
+            if (!$existingTest) {
+                $testToken = Str::uuid()->toString();
+                AdmissionTest::create([
+                    'id_registrasi' => $registrasi->id_registrasi,
+                    'token' => $testToken,
+                    'test_type' => 'primary',
+                    'status' => 'assigned',
+                ]);
+                $registrasi->update(['test_access_token' => $testToken]);
+            }
+        }
+
+        $namaLengkap = $this->resolveUserName($user);
         $this->adminService->logActivity(Auth::id(), "Approved registration: {$namaLengkap}", $request->ip());
-        $test = $this->assignAdmissionTest($registrasi, 'primary');
-        $this->adminService->sendRegistrationInboxMessage(
-            $registrasi,
+        $this->adminService->sendUserInboxMessage(
+            $user,
             'approved',
             $namaLengkap,
-            Auth::user()->username,
-            'Berkas Disetujui - Siapkan Tes Masuk',
-            "Halo {$namaLengkap}, berkas pendaftaran Anda sudah disetujui. Silakan lanjutkan ke tes kemampuan dasar dan tes minat bakat melalui tombol di bawah ini.",
-            'Mulai Tes',
-            route('user.test.show', $test->token)
+            $this->resolveUserName(Auth::user())
         );
+
+        if (!empty($user->email) && isset($token)) {
+            Mail::to($user->email)->queue(new AdmissionTokenMail($user, $token));
+        }
 
         $this->discordService->sendNotification(
             '✅ Registration Approved',
-            "Admin **" . Auth::user()->username . "** has **approved** the registration for **{$namaLengkap}**.",
+            "Admin **" . $this->resolveUserName(Auth::user()) . "** has **approved** the registration for **{$namaLengkap}**.",
             3066993, // Green
             [
-                ['name' => 'NISN', 'value' => $registrasi->nisn, 'inline' => true],
+                ['name' => 'NISN', 'value' => $user->nisn ?? '-', 'inline' => true],
                 ['name' => 'Nama', 'value' => $namaLengkap, 'inline' => true]
             ]
         );
@@ -234,10 +354,10 @@ class AdminController extends Controller
 
         $this->discordService->sendNotification(
             'Registration Uncertain',
-            "Admin **" . Auth::user()->username . "** has marked the registration for **{$registrasi->nama_lengkap}** as uncertain.",
+            "Admin **" . $this->resolveUserName(Auth::user()) . "** has marked the registration for **{$registrasi->nama_lengkap}** as uncertain.",
             16776960, // Yellow
             [
-                ['name' => 'NISN', 'value' => $registrasi->nisn, 'inline' => true],
+                ['name' => 'NISN', 'value' => $registrasi->nisn ?? '-', 'inline' => true],
                 ['name' => 'Nama', 'value' => $registrasi->nama_lengkap, 'inline' => true]
             ]
         );
@@ -248,17 +368,66 @@ class AdminController extends Controller
     public function rejectRegistration(Request $request, int $id)
     {
         $registrasi = Registrasi::findOrFail($id);
-        $this->adminService->rejectRegistration($registrasi);
-        $namaLengkap = $this->resolveRegistrationName($registrasi);
+        $detail = Schema::hasTable('detail_registrasi')
+            ? DB::table('detail_registrasi')->where('id_registrasi', $registrasi->id_registrasi)->first()
+            : null;
+        $email = ($detail->email ?? null) ?: ($registrasi->email ?? null);
+        $namaLengkap = ($detail->nama_lengkap ?? null) ?: ($registrasi->nama_lengkap ?? 'Unknown');
+
+        $registrasi->update([
+            'status' => 'rejected',
+            'current_stage' => 'closed',
+        ]);
+
+        $this->discordService->sendNotification(
+            'âŒ Registration Rejected',
+            "Admin **" . $this->resolveUserName(Auth::user()) . "** has **rejected** the registration for **{$namaLengkap}**.",
+            15158332,
+            [
+                ['name' => 'NISN', 'value' => $registrasi->nisn ?? '-', 'inline' => true],
+                ['name' => 'Nama', 'value' => $namaLengkap, 'inline' => true]
+            ]
+        );
+
+        $adminName = $this->resolveUserName(Auth::user());
+        if (!empty($email)) {
+            Mail::to($email)->queue(new RegistrationRejectedMail($namaLengkap ?? 'Unknown', $registrasi->nisn ?? '-', $adminName));
+        }
+
+        return redirect()->route('admin.queue', ['status' => 'rejected'])->with('success', 'Pendaftaran ditolak.');
+    }
+
+    public function rejectRegistrationLegacy(Request $request, int $id)
+    {
+        $user = User::withTrashed()->findOrFail($id);
+        $userColumns = Schema::getColumnListing('users');
+        if (in_array('role', $userColumns, true)) {
+            $user->role = null;
+        }
+        $user->save();
+        if (in_array('deleted_at', $userColumns, true)) {
+            $user->delete();
+        }
+
+        $namaLengkap = $this->resolveUserName($user);
         $this->adminService->logActivity(Auth::id(), "Rejected registration: {$namaLengkap}", $request->ip());
-        $this->adminService->sendRegistrationInboxMessage($registrasi, 'rejected', $namaLengkap, Auth::user()->username);
+        $this->adminService->sendUserInboxMessage(
+            $user,
+            'rejected',
+            $namaLengkap,
+            $this->resolveUserName(Auth::user())
+        );
+
+        if (!empty($user->email)) {
+            Mail::to($user->email)->queue(new AdmissionRejectedMail($user));
+        }
 
         $this->discordService->sendNotification(
             '❌ Registration Rejected',
-            "Admin **" . Auth::user()->username . "** has **rejected** the registration for **{$namaLengkap}**.",
+            "Admin **" . $this->resolveUserName(Auth::user()) . "** has **rejected** the registration for **{$namaLengkap}**.",
             15158332, // Red
             [
-                ['name' => 'NISN', 'value' => $registrasi->nisn, 'inline' => true],
+                ['name' => 'NISN', 'value' => $user->nisn ?? '-', 'inline' => true],
                 ['name' => 'Nama', 'value' => $namaLengkap, 'inline' => true]
             ]
         );
@@ -292,12 +461,17 @@ class AdminController extends Controller
             $registrasi,
             'approved',
             $namaLengkap,
-            Auth::user()->username,
+            $this->resolveUserName(Auth::user()),
             'Lulus Seleksi - Silakan Daftar Ulang',
             "Halo {$namaLengkap}, Anda dinyatakan lulus seleksi. Silakan lanjutkan proses daftar ulang melalui tautan berikut.",
             'Daftar Ulang',
             route('user.reregister.show', $token)
         );
+
+        $user = User::find($registrasi->id_user);
+        if ($user && $user->email) {
+            Mail::to($user->email)->queue(new TestPassedMail($user, route('user.reregister.show', $token)));
+        }
 
         return back()->with('success', 'Calon siswa dinyatakan lulus dan link daftar ulang sudah dikirim ke inbox.');
     }
@@ -306,16 +480,20 @@ class AdminController extends Controller
     {
         $registrasi = Registrasi::findOrFail($id);
         $namaLengkap = $this->resolveRegistrationName($registrasi);
+        $validated = $request->validate([
+            'recommended_jurusan_id' => ['required', 'exists:jurusan,id_jurusan'],
+        ]);
+        $token = Str::uuid()->toString();
 
         AdmissionTest::where('id_registrasi', $registrasi->id_registrasi)
             ->where('status', 'submitted')
             ->update(['status' => 'reviewed']);
 
-        $test = $this->assignAdmissionTest($registrasi, 'follow_up');
-
         $registrasi->update([
             'selection_status' => 'uncertain',
-            'current_stage' => 'follow_up_test',
+            'current_stage' => 're_registration',
+            're_registration_token' => $token,
+            'recommended_jurusan_id' => $validated['recommended_jurusan_id'],
         ]);
 
         $this->adminService->logActivity(Auth::id(), "Set candidate uncertain after test: {$namaLengkap}", $request->ip());
@@ -323,14 +501,20 @@ class AdminController extends Controller
             $registrasi,
             'uncertain',
             $namaLengkap,
-            Auth::user()->username,
-            'Tes Lanjutan Dibutuhkan',
-            "Halo {$namaLengkap}, hasil seleksi Anda masih memerlukan penilaian lanjutan. Silakan ikuti tes tambahan melalui tautan berikut.",
-            'Kerjakan Tes Lanjutan',
-            route('user.test.show', $test->token)
+            $this->resolveUserName(Auth::user()),
+            'Rekomendasi Jurusan',
+            "Halo {$namaLengkap}, hasil seleksi Anda memerlukan penyesuaian jurusan. Silakan daftar ulang pada jalur yang direkomendasikan melalui tautan berikut.",
+            'Daftar Ulang',
+            route('user.reregister.show', $token)
         );
 
-        return back()->with('success', 'Calon siswa diberi status uncertain dan tes lanjutan telah dikirim.');
+        $user = User::find($registrasi->id_user);
+        $jurusanName = Jurusan::where('id_jurusan', $validated['recommended_jurusan_id'])->value('nama_jurusan');
+        if ($user && $user->email) {
+            Mail::to($user->email)->queue(new TestUncertainMail($user, $jurusanName ?? '', route('user.reregister.show', $token)));
+        }
+
+        return back()->with('success', 'Rekomendasi jurusan dikirim dan link daftar ulang sudah tersedia.');
     }
 
     public function failTestCandidate(Request $request, int $id)
@@ -353,10 +537,15 @@ class AdminController extends Controller
             $registrasi,
             'rejected',
             $namaLengkap,
-            Auth::user()->username,
+            $this->resolveUserName(Auth::user()),
             'Hasil Seleksi Akhir',
             "Halo {$namaLengkap}, setelah proses tes dan seleksi akhir, Anda belum dapat diterima pada gelombang ini. Terima kasih telah mengikuti proses pendaftaran.",
         );
+
+        $user = User::find($registrasi->id_user);
+        if ($user && $user->email) {
+            Mail::to($user->email)->queue(new TestFailedMail($user));
+        }
 
         return back()->with('success', 'Calon siswa dinyatakan tidak lulus.');
     }
@@ -375,7 +564,18 @@ class AdminController extends Controller
 
         return DB::table('users')
             ->where('id_user', $registrasi->id_user)
-            ->value('username') ?? 'Unknown';
+            ->value('nama_lengkap') ?? 'Unknown';
+    }
+
+    private function resolveUserName(User $user): string
+    {
+        if (!empty($user->nama_lengkap)) {
+            return $user->nama_lengkap;
+        }
+        if (!empty($user->email)) {
+            return $user->email;
+        }
+        return 'Unknown';
     }
 
     private function assignAdmissionTest(Registrasi $registrasi, string $type): AdmissionTest

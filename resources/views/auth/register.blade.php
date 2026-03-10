@@ -24,7 +24,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
                 </svg>
             </div>
-            <h1 class="text-2xl font-bold text-white tracking-tight">Buat Akun</h1>
+            <h1 class="text-2xl font-bold text-white tracking-tight">Registrasi</h1>
             <p class="text-slate-400 text-sm mt-1">Lengkapi data untuk pendaftaran</p>
         </div>
 
@@ -57,17 +57,6 @@
                     <h2 class="text-sm font-semibold text-slate-200">Informasi Akun</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="username" class="block text-sm font-medium text-slate-300 mb-2">Username</label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                                    <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                                </div>
-                                <input type="text" name="username" id="username" value="{{ old('username') }}" required
-                                    class="w-full pl-11 pr-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/40 focus:border-purple-500/40 transition-all duration-300"
-                                    placeholder="johndoe">
-                            </div>
-                        </div>
-                        <div>
                             <label for="email" class="block text-sm font-medium text-slate-300 mb-2">Email</label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -84,32 +73,9 @@
                                 class="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/40 focus:border-purple-500/40 transition-all duration-300"
                                 placeholder="08xxxxxxxxxx">
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-300 mb-2">Role</label>
-                            <input type="hidden" name="role" value="1">
-                            <input type="text" value="Siswa" disabled
-                                class="w-full px-4 py-3 bg-white/[0.02] border border-white/[0.06] rounded-xl text-slate-400 text-sm">
-                        </div>
-                        <div>
-                            <label for="password" class="block text-sm font-medium text-slate-300 mb-2">Password</label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                                    <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                                </div>
-                                <input type="password" name="password" id="password" required
-                                    class="w-full pl-11 pr-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/40 focus:border-purple-500/40 transition-all duration-300"
-                                    placeholder="********">
-                            </div>
-                        </div>
-                        <div>
-                            <label for="password_confirmation" class="block text-sm font-medium text-slate-300 mb-2">Konfirmasi Password</label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                                    <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                                </div>
-                                <input type="password" name="password_confirmation" id="password_confirmation" required
-                                    class="w-full pl-11 pr-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/40 focus:border-purple-500/40 transition-all duration-300"
-                                    placeholder="********">
+                        <div class="md:col-span-2">
+                            <div class="rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-slate-300">
+                                Akun akan dibuat setelah pendaftaran disetujui oleh admin.
                             </div>
                         </div>
                     </div>
@@ -153,8 +119,15 @@
                         </div>
                         <div>
                             <label for="agama" class="block text-sm font-medium text-slate-300 mb-2">Agama</label>
-                            <input type="text" name="agama" id="agama" value="{{ old('agama') }}" required
-                                class="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/40 focus:border-purple-500/40 transition-all duration-300">
+                            <select name="agama" id="agama" required
+                                class="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/40 focus:border-purple-500/40 transition-all duration-300">
+                                <option value="Islam" {{ old('agama') === 'Islam' ? 'selected' : '' }}>Islam</option>
+                                <option value="Kristen" {{ old('agama') === 'Kristen' ? 'selected' : '' }}>Kristen</option>
+                                <option value="Buddha" {{ old('agama') === 'Buddha' ? 'selected' : '' }}>Buddha</option>
+                                <option value="Katolik" {{ old('agama') === 'Katolik' ? 'selected' : '' }}>Katolik</option>
+                                <option value="Hindu" {{ old('agama') === 'Hindu' ? 'selected' : '' }}>Hindu</option>
+                                <option value="Konghucu" {{ old('agama') === 'Konghucu' ? 'selected' : '' }}>Konghucu</option>
+                            </select>
                         </div>
                         <div>
                             <label for="anak_ke" class="block text-sm font-medium text-slate-300 mb-2">Anak Ke-</label>
@@ -218,7 +191,7 @@
                                 class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-purple-500/20 file:text-purple-200 hover:file:bg-purple-500/30">
                         </div>
                         <div>
-                            <label for="pas_foto" class="block text-sm font-medium text-slate-300 mb-2">Pas Foto</label>
+                            <label for="pas_foto" class="block text-sm font-medium text-slate-300 mb-2">Pas Foto(4x3)</label>
                             <input type="file" name="pas_foto" id="pas_foto"
                                 class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-purple-500/20 file:text-purple-200 hover:file:bg-purple-500/30">
                         </div>
@@ -245,7 +218,7 @@
 
             <div class="mt-6 pt-6 border-t border-white/[0.06] text-center">
                 <p class="text-slate-400 text-sm">
-                    Sudah punya akun?
+                    Sudah daftar?
                     <a href="{{ route('login') }}" class="text-purple-400 hover:text-purple-300 font-medium transition-colors">Masuk</a>
                 </p>
             </div>

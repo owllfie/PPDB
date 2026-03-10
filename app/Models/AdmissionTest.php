@@ -11,6 +11,7 @@ class AdmissionTest extends Model
 
     protected $fillable = [
         'id_registrasi',
+        'id_jurusan',
         'token',
         'test_type',
         'status',

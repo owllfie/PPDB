@@ -20,6 +20,7 @@
                         <th class="px-6 py-4">Skor Dasar</th>
                         <th class="px-6 py-4">Skor Minat</th>
                         <th class="px-6 py-4">Total</th>
+                        <th class="px-6 py-4">Jurusan</th>
                         <th class="px-6 py-4">Tahap</th>
                         <th class="px-6 py-4 text-center">Keputusan</th>
                     </tr>
@@ -33,6 +34,7 @@
                             <td class="px-6 py-4">{{ $test->basic_score }}</td>
                             <td class="px-6 py-4">{{ $test->interest_score }}</td>
                             <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white">{{ $test->total_score }}</td>
+                            <td class="px-6 py-4">{{ $test->jurusan_nama ?? '-' }}</td>
                             <td class="px-6 py-4">{{ str_replace('_', ' ', $test->current_stage) }}</td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center justify-center gap-2">
@@ -44,6 +46,12 @@
                                     </form>
                                     <form action="{{ route('admin.tests.uncertain', $test->id_registrasi) }}" method="POST">
                                         @csrf
+                                        <select name="recommended_jurusan_id" required class="px-2 py-1 text-xs rounded-lg border border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                                            <option value="" disabled selected>Rekomendasi</option>
+                                            @foreach($jurusans as $jurusan)
+                                                <option value="{{ $jurusan->id_jurusan }}">{{ $jurusan->nama_jurusan }}</option>
+                                            @endforeach
+                                        </select>
                                         <button type="submit" class="px-3 py-1.5 text-xs font-medium text-amber-700 bg-amber-50 rounded-lg hover:bg-amber-100 dark:text-amber-400 dark:bg-amber-900/30">
                                             Uncertain
                                         </button>
@@ -59,7 +67,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">Belum ada hasil tes yang masuk.</td>
+                            <td colspan="9" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">Belum ada hasil tes yang masuk.</td>
                         </tr>
                     @endforelse
                 </tbody>

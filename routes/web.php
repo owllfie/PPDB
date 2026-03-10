@@ -14,7 +14,7 @@ Route::get('/', function () {
     if (auth()->check()) {
         return redirect()->route('index');
     }
-    return redirect()->route('login');
+    return view('dashboard.user');
 });
 
 Route::middleware('guest')->group(function () {
@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'verified.email'])->group(function () {
     Route::get('/index', [MainCont::class, 'index'])->name('index');
+    Route::get('/admission/test', [AdmissionController::class, 'showCurrentTest'])->name('user.test.current');
 
     Route::middleware('permission:user.register')->group(function () {
         Route::get('/registration', [\App\Http\Controllers\RegistrationController::class, 'create'])->name('user.register.form');
@@ -48,9 +49,10 @@ Route::middleware(['auth', 'verified.email'])->group(function () {
         Route::get('/inbox', [InboxController::class, 'index'])->name('user.inbox');
         Route::get('/admission/test/{token}', [AdmissionController::class, 'showTest'])->name('user.test.show');
         Route::post('/admission/test/{token}', [AdmissionController::class, 'submitTest'])->name('user.test.submit');
-        Route::get('/admission/reregister/{token}', [AdmissionController::class, 'showReRegistration'])->name('user.reregister.show');
-        Route::post('/admission/reregister/{token}', [AdmissionController::class, 'submitReRegistration'])->name('user.reregister.submit');
     });
+
+    Route::get('/admission/reregister/{token}', [AdmissionController::class, 'showReRegistration'])->name('user.reregister.show');
+    Route::post('/admission/reregister/{token}', [AdmissionController::class, 'submitReRegistration'])->name('user.reregister.submit');
 
     // User Management
     Route::middleware('permission:admin.users')->group(function () {

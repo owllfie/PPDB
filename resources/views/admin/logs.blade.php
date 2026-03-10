@@ -55,7 +55,7 @@
                         <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                             <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ $logs->firstItem() + $loop->index }}</td>
                             <td class="px-6 py-4">
-                                <span class="font-medium text-gray-900 dark:text-white">{{ $log->user->username ?? 'Deleted' }}</span>
+                                <span class="font-medium text-gray-900 dark:text-white">{{ optional($log->user)->nama_lengkap ?? optional($log->user)->email ?? 'Deleted' }}</span>
                             </td>
                             <td class="px-6 py-4">{{ $log->action }}</td>
                             <td class="px-6 py-4">

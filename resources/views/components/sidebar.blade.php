@@ -1,45 +1,10 @@
 <aside id="logo-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700 duration-300 ease-in-out" aria-label="Sidebar">
    <div class="h-full flex flex-col px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
       <ul class="space-y-1.5 font-medium flex-1">
-         <li>
-            <a href="{{ route('index') }}" class="flex items-center p-2.5 rounded-lg transition-colors {{ request()->routeIs('index') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-               <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 22 21" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-.066h.002Z"/>
-                  <path d="M12.5 0c-.157 0-.311.01-.462.03a.999.999 0 0 0-.812 1.015V7.474a.5.5 0 0 0 .5.5H18.5a1 1 0 0 0 1.015-.812A9.513 9.513 0 0 0 12.5 0Z"/>
-               </svg>
-               <span class="ml-3">Dashboard</span>
-            </a>
-         </li>
 
          @php
             $userRole = Auth::user()->roleRelation;
          @endphp
-
-         @if($userRole && $userRole->hasPermission('user.register'))
-            <li>
-               <a href="{{ route('user.register.form') }}" class="flex items-center p-2.5 rounded-lg transition-colors {{ request()->routeIs('user.register.form') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                  <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                     <path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
-                  </svg>
-                  <span class="ml-3">Registration Form</span>
-               </a>
-            </li>
-            <li>
-               <a href="{{ route('user.inbox') }}" class="flex items-center justify-between p-2.5 rounded-lg transition-colors {{ request()->routeIs('user.inbox') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                  <span class="flex items-center">
-                     <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z"/>
-                     </svg>
-                     <span class="ml-3">Inbox</span>
-                  </span>
-                  @if(($unreadInboxCount ?? 0) > 0)
-                     <span class="ml-3 inline-flex min-w-6 items-center justify-center rounded-full bg-rose-500 px-2 py-0.5 text-xs font-semibold text-white">
-                        {{ $unreadInboxCount }}
-                     </span>
-                  @endif
-               </a>
-            </li>
-         @endif
 
          @if($userRole && ($userRole->hasPermission('admin.users') || $userRole->hasPermission('admin.queue') || $userRole->hasPermission('admin.reports')))
             <li class="pt-3">

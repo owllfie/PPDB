@@ -15,10 +15,6 @@ class EnsureEmailIsVerified
             return redirect()->route('login');
         }
 
-        if (!Auth::user()->is_verified) {
-            return redirect()->route('verify.email')->with('warning', 'Please verify your email before accessing this page.');
-        }
-
         return $next($request);
     }
 }

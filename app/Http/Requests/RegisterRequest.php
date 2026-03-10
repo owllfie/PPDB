@@ -14,10 +14,8 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'username' => ['required', 'string', 'min:3', 'max:50'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'no_hp' => ['required', 'string', 'max:50'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
             'nisn' => ['required', 'string', 'max:50'],
             'nama_lengkap' => ['required', 'string', 'max:50'],
             'nik' => ['required', 'string', 'max:50'],
@@ -43,15 +41,10 @@ class RegisterRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'username.required' => 'Username is required.',
-            'username.min' => 'Username must be at least 3 characters.',
             'email.required' => 'Email address is required.',
             'email.email' => 'Please provide a valid email address.',
             'email.unique' => 'This email is already registered.',
             'no_hp.required' => 'Phone number is required.',
-            'password.required' => 'Password is required.',
-            'password.min' => 'Password must be at least 8 characters.',
-            'password.confirmed' => 'Password confirmation does not match.',
             'nisn.required' => 'NISN is required.',
             'nama_lengkap.required' => 'Full name is required.',
             'nik.required' => 'NIK is required.',

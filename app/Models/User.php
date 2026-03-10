@@ -16,27 +16,21 @@ class User extends Authenticatable
     protected $primaryKey = 'id_user';
 
     protected $fillable = [
-        'username',
+        'nisn',
+        'nama_lengkap',
         'email',
         'no_hp',
         'password',
         'role',
-        'is_verified',
-        'otp_code',
-        'otp_expires_at',
     ];
 
     protected $hidden = [
         'password',
-        'otp_code',
     ];
 
     protected function casts(): array
     {
-        return [
-            'otp_expires_at' => 'datetime',
-            'is_verified' => 'boolean',
-        ];
+        return [];
     }
 
     public function roleRelation()

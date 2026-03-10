@@ -50,10 +50,16 @@ class PasswordResetController extends Controller
         }
 
         $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
-        $user->update([
-            'otp_code' => $otp,
-            'otp_expires_at' => now()->addMinutes(10),
-        ]);
+        $token = Str::random(64);
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $request->email],
+            [
+                'phone' => $user->no_hp,
+                'token' => $token,
+                'otp' => $otp,
+                'created_at' => now(),
+            ]
+        );
 
         $this->whatsAppService->sendOTP($user->no_hp, $otp);
 
@@ -76,32 +82,17 @@ class PasswordResetController extends Controller
             'otp' => 'required|string|size:6',
         ]);
 
-        $user = User::where('email', $request->email)
-            ->where('otp_code', $request->otp)
-            ->where('otp_expires_at', '>', now())
+        $record = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->where('otp', $request->otp)
+            ->where('created_at', '>', now()->subMinutes(10))
             ->first();
 
-        if (!$user) {
+        if (!$record) {
             return back()->withErrors(['otp' => 'Kode OTP tidak valid atau telah kedaluwarsa.']);
         }
 
-        // Generate a temporary reset token to reuse the existing reset form
-        $token = Str::random(64);
-        DB::table('password_reset_tokens')->updateOrInsert(
-            ['email' => $request->email],
-            [
-                'token' => $token,
-                'created_at' => Carbon::now()
-            ]
-        );
-
-        // Clear OTP
-        $user->update([
-            'otp_code' => null,
-            'otp_expires_at' => null,
-        ]);
-
-        return redirect()->route('password.reset', ['token' => $token, 'email' => $request->email]);
+        return redirect()->route('password.reset', ['token' => $record->token, 'email' => $request->email]);
     }
 
     public function sendResetLinkEmail(ForgotPasswordRequest $request)

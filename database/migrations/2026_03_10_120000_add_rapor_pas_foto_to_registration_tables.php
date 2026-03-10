@@ -11,10 +11,10 @@ return new class extends Migration
         if (Schema::hasTable('registrasi')) {
             Schema::table('registrasi', function (Blueprint $table) {
                 if (!Schema::hasColumn('registrasi', 'rapor')) {
-                    $table->string('rapor', 255)->nullable()->after('akta_lahir');
+                    $table->string('rapor', 255)->nullable();
                 }
                 if (!Schema::hasColumn('registrasi', 'pas_foto')) {
-                    $table->string('pas_foto', 255)->nullable()->after('rapor');
+                    $table->string('pas_foto', 255)->nullable();
                 }
             });
         }
@@ -22,10 +22,10 @@ return new class extends Migration
         if (Schema::hasTable('detail_registrasi')) {
             Schema::table('detail_registrasi', function (Blueprint $table) {
                 if (!Schema::hasColumn('detail_registrasi', 'rapor')) {
-                    $table->string('rapor', 255)->nullable()->after('akta_lahir');
+                    $table->string('rapor', 255)->nullable();
                 }
                 if (!Schema::hasColumn('detail_registrasi', 'pas_foto')) {
-                    $table->string('pas_foto', 255)->nullable()->after('rapor');
+                    $table->string('pas_foto', 255)->nullable();
                 }
             });
         }

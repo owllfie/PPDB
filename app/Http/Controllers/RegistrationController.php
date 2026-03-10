@@ -104,6 +104,13 @@ class RegistrationController extends Controller
             DB::table('detail_registrasi')->insert($detailData);
         });
 
+        Auth::user()->update([
+            'nama_lengkap' => $validated['nama_lengkap'],
+            'alamat' => $validated['alamat_lengkap'],
+            'no_hp' => $validated['no_hp'],
+            'email' => $validated['email'],
+        ]);
+
         $this->adminService->logActivity(Auth::id(), 'Submitted new registration for: ' . $validated['nama_lengkap'], $request->ip());
 
         return redirect()->route('index')->with('success', 'Pendaftaran berhasil dikirim! Silakan tunggu konfirmasi dari admin.');

@@ -23,7 +23,7 @@ class AdminService
         if (Schema::hasColumn('registrasi', 'nama_lengkap')) {
             return 'registrasi.nama_lengkap';
         }
-        return 'users.username';
+        return 'users.nama_lengkap';
     }
 
     private function registrationWithDetailQuery(): Builder
@@ -60,7 +60,7 @@ class AdminService
         } elseif (Schema::hasColumn('registrasi', 'nama_lengkap')) {
             $query->addSelect('registrasi.nama_lengkap');
         } else {
-            $query->addSelect(DB::raw('users.username as nama_lengkap'));
+            $query->addSelect(DB::raw('users.nama_lengkap as nama_lengkap'));
         }
 
         return $query;
@@ -85,12 +85,12 @@ class AdminService
 
         if ($search) {
             $query->where(function($q) use ($search) {
-                $q->where('username', 'like', "%{$search}%")
+                $q->where('nama_lengkap', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
-        $allowedSorts = ['username', 'email', 'role', 'created_at'];
+        $allowedSorts = ['nama_lengkap', 'email', 'role', 'created_at'];
         $sort = in_array($sort, $allowedSorts) ? $sort : 'created_at';
         $order = strtolower($order) === 'asc' ? 'asc' : 'desc';
 
@@ -104,12 +104,12 @@ class AdminService
 
         if ($search) {
             $query->where(function($q) use ($search) {
-                $q->where('username', 'like', "%{$search}%")
+                $q->where('nama_lengkap', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
-        $allowedSorts = ['username', 'email', 'deleted_at'];
+        $allowedSorts = ['nama_lengkap', 'email', 'deleted_at'];
         $sort = in_array($sort, $allowedSorts) ? $sort : 'deleted_at';
         $order = strtolower($order) === 'asc' ? 'asc' : 'desc';
 
@@ -124,9 +124,11 @@ class AdminService
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->whereHas('user', function($uq) use ($search) {
-                    $uq->where('username', 'like', "%{$search}%");
+                    $uq->where('nama_lengkap', 'like', "%{$search}%")
+                       ->orWhere('email', 'like', "%{$search}%");
                 })->orWhereHas('admin', function($aq) use ($search) {
-                    $aq->where('username', 'like', "%{$search}%");
+                    $aq->where('nama_lengkap', 'like', "%{$search}%")
+                       ->orWhere('email', 'like', "%{$search}%");
                 })->orWhere('field', 'like', "%{$search}%")
                   ->orWhere('old_value', 'like', "%{$search}%")
                   ->orWhere('new_value', 'like', "%{$search}%");
@@ -199,24 +201,92 @@ class AdminService
         $allowedStatuses = ['pending', 'approved', 'rejected'];
         $status = in_array($status, $allowedStatuses, true) ? $status : 'pending';
 
-        $nameColumn = $this->registrationNameColumn();
-        $query = $this->registrationWithDetailQuery()
-            ->where('registrasi.status', $status);
+        $detailColumns = Schema::hasTable('detail_registrasi') ? Schema::getColumnListing('detail_registrasi') : [];
+        $selects = ['registrasi.*'];
+        if (!empty($detailColumns)) {
+            $selectMap = [
+                'nik' => 'detail.nik',
+                'tempat_lahir' => 'detail.tempat_lahir',
+                'tanggal_lahir' => 'detail.tanggal_lahir',
+                'jenis_kelamin' => 'detail.jenis_kelamin',
+                'agama' => 'detail.agama',
+                'alamat_lengkap' => 'detail.alamat_lengkap',
+                'no_hp' => 'detail.no_hp',
+                'email' => 'detail.email',
+                'nama_ayah' => 'detail.nama_ayah',
+                'nama_ibu' => 'detail.nama_ibu',
+                'pekerjaan_ayah' => 'detail.pekerjaan_ayah',
+                'pekerjaan_ibu' => 'detail.pekerjaan_ibu',
+                'sekolah_asal' => 'detail.sekolah_asal',
+                'id_jurusan' => 'detail.id_jurusan',
+                'kk' => 'detail.kk',
+                'ijazah' => 'detail.ijazah',
+                'akta_lahir' => 'detail.akta_lahir',
+                'rapor' => 'detail.rapor',
+                'pas_foto' => 'detail.pas_foto',
+            ];
+
+            foreach ($selectMap as $column => $select) {
+                if (in_array($column, $detailColumns, true)) {
+                    $selects[] = $select;
+                }
+            }
+            if (in_array('anak_ke-', $detailColumns, true)) {
+                $selects[] = DB::raw('detail.`anak_ke-` as anak_ke');
+            }
+        }
+
+        $query = Registrasi::query();
+        if (!empty($detailColumns)) {
+            $query->leftJoin('detail_registrasi as detail', 'detail.id_registrasi', '=', 'registrasi.id_registrasi');
+        }
+        $query->select($selects);
+
+        if (in_array('nama_lengkap', $detailColumns, true)) {
+            $query->addSelect('detail.nama_lengkap');
+        } elseif (Schema::hasColumn('registrasi', 'nama_lengkap')) {
+            $query->addSelect('registrasi.nama_lengkap');
+        }
+
+        $query->where('registrasi.status', $status);
 
         if ($search) {
-            $query->where(function($q) use ($search, $nameColumn) {
-                $q->where('registrasi.nisn', 'like', "%{$search}%")
-                  ->orWhere($nameColumn, 'like', "%{$search}%")
-                  ->orWhere('detail.sekolah_asal', 'like', "%{$search}%")
-                  ->orWhere('detail.no_hp', 'like', "%{$search}%");
+            $query->where(function($q) use ($search) {
+                $q->where('registrasi.nisn', 'like', "%{$search}%");
+                if (Schema::hasColumn('registrasi', 'nama_lengkap')) {
+                    $q->orWhere('registrasi.nama_lengkap', 'like', "%{$search}%");
+                }
+                if (Schema::hasColumn('registrasi', 'email')) {
+                    $q->orWhere('registrasi.email', 'like', "%{$search}%");
+                }
+                if (Schema::hasColumn('registrasi', 'no_hp')) {
+                    $q->orWhere('registrasi.no_hp', 'like', "%{$search}%");
+                }
+                if (Schema::hasColumn('registrasi', 'sekolah_asal')) {
+                    $q->orWhere('registrasi.sekolah_asal', 'like', "%{$search}%");
+                }
+                if (Schema::hasTable('detail_registrasi')) {
+                    $detailColumns = Schema::getColumnListing('detail_registrasi');
+                    if (in_array('nama_lengkap', $detailColumns, true)) {
+                        $q->orWhere('detail.nama_lengkap', 'like', "%{$search}%");
+                    }
+                    if (in_array('email', $detailColumns, true)) {
+                        $q->orWhere('detail.email', 'like', "%{$search}%");
+                    }
+                    if (in_array('no_hp', $detailColumns, true)) {
+                        $q->orWhere('detail.no_hp', 'like', "%{$search}%");
+                    }
+                    if (in_array('sekolah_asal', $detailColumns, true)) {
+                        $q->orWhere('detail.sekolah_asal', 'like', "%{$search}%");
+                    }
+                }
             });
         }
 
         $sortMap = [
             'nisn' => 'registrasi.nisn',
-            'nama_lengkap' => $nameColumn,
+            'nama_lengkap' => Schema::hasColumn('detail_registrasi', 'nama_lengkap') ? 'detail.nama_lengkap' : 'registrasi.nama_lengkap',
             'created_at' => 'registrasi.created_at',
-            'nilai_rapor' => 'registrasi.nilai_rapor',
         ];
         $sort = $sortMap[$sort] ?? 'registrasi.created_at';
         $order = strtolower($order) === 'asc' ? 'asc' : 'desc';
@@ -283,6 +353,44 @@ class AdminService
         ]);
     }
 
+    public function sendUserInboxMessage(
+        User $user,
+        string $status,
+        string $studentName,
+        string $adminName,
+        ?string $customSubject = null,
+        ?string $customMessage = null,
+        ?string $actionLabel = null,
+        ?string $actionUrl = null
+    ): void
+    {
+        $subjectMap = [
+            'approved' => 'Registration Approved',
+            'rejected' => 'Registration Rejected',
+            'uncertain' => 'Registration Needs Review',
+        ];
+
+        $nisn = $user->nisn ?? '-';
+        $messageMap = [
+            'approved' => "Hello {$studentName}, your registration with NISN {$nisn} has been approved by {$adminName}.",
+            'rejected' => "Hello {$studentName}, your registration with NISN {$nisn} has been rejected by {$adminName}. Please review your submitted data and contact the school if you need clarification.",
+            'uncertain' => "Hello {$studentName}, your registration with NISN {$nisn} has been marked uncertain by {$adminName}. The school needs additional review before making a final decision.",
+        ];
+
+        if (!isset($subjectMap[$status], $messageMap[$status]) && (!$customSubject || !$customMessage)) {
+            return;
+        }
+
+        UserInbox::create([
+            'id_user' => $user->id_user,
+            'subject' => $customSubject ?? $subjectMap[$status],
+            'message' => $customMessage ?? $messageMap[$status],
+            'status' => $status,
+            'action_label' => $actionLabel,
+            'action_url' => $actionUrl,
+        ]);
+    }
+
     public function uncertainRegistration(Registrasi $registrasi): void
     {
         $registrasi->update(['status' => 'uncertain']);
@@ -295,7 +403,8 @@ class AdminService
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->whereHas('user', function($uq) use ($search) {
-                    $uq->where('username', 'like', "%{$search}%");
+                    $uq->where('nama_lengkap', 'like', "%{$search}%")
+                       ->orWhere('email', 'like', "%{$search}%");
                 })->orWhere('action', 'like', "%{$search}%")
                   ->orWhere('ip_address', 'like', "%{$search}%");
             });

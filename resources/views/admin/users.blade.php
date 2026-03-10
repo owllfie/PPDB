@@ -65,9 +65,9 @@
                         <tr>
                             <th class="px-6 py-4">No</th>
                             <th class="px-6 py-4">
-                                <a href="{{ request()->fullUrlWithQuery(['sort_now' => 'username', 'order_now' => request('sort_now') == 'username' && request('order_now') == 'asc' ? 'desc' : 'asc']) }}" class="flex items-center gap-1 hover:text-indigo-600 transition-colors">
-                                    Username
-                                    @if(request('sort_now') == 'username')
+                                <a href="{{ request()->fullUrlWithQuery(['sort_now' => 'nama_lengkap', 'order_now' => request('sort_now') == 'nama_lengkap' && request('order_now') == 'asc' ? 'desc' : 'asc']) }}" class="flex items-center gap-1 hover:text-indigo-600 transition-colors">
+                                    Nama Lengkap
+                                    @if(request('sort_now') == 'nama_lengkap')
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ request('order_now') == 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"></path></svg>
                                     @endif
                                 </a>
@@ -88,7 +88,6 @@
                                     @endif
                                 </a>
                             </th>
-                            <th class="px-6 py-4">Verified</th>
                             <th class="px-6 py-4">
                                 <a href="{{ request()->fullUrlWithQuery(['sort_now' => 'created_at', 'order_now' => request('sort_now') == 'created_at' && request('order_now') == 'asc' ? 'desc' : 'asc']) }}" class="flex items-center gap-1 hover:text-indigo-600 transition-colors">
                                     Created
@@ -104,7 +103,7 @@
                         @forelse($users as $user)
                             <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                 <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ $users->firstItem() + $loop->index }}</td>
-                                <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ $user->username }}</td>
+                                <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ $user->nama_lengkap ?? $user->email }}</td>
                                 <td class="px-6 py-4">{{ $user->email }}</td>
                                 <td class="px-6 py-4">
                                     <span class="px-2.5 py-1 text-xs font-medium rounded-full
@@ -113,19 +112,6 @@
                                            'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300') }}">
                                         {{ $user->roleRelation->role ?? 'N/A' }}
                                     </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    @if($user->is_verified)
-                                        <span class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                                            Verified
-                                        </span>
-                                    @else
-                                        <span class="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path></svg>
-                                            Pending
-                                        </span>
-                                    @endif
                                 </td>
                                 <td class="px-6 py-4 text-xs">{{ $user->created_at?->format('d M Y') ?? '-' }}</td>
                                 <td class="px-6 py-4">
@@ -151,7 +137,7 @@
                                     <div id="role-modal-{{ $user->id_user }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm">
                                         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4 transform transition-all">
                                             <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Change User Role</h3>
-                                            <p class="text-sm text-gray-500 mb-6">Updating privileges for <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $user->username }}</span></p>
+                                            <p class="text-sm text-gray-500 mb-6">Updating privileges for <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $user->nama_lengkap ?? $user->email }}</span></p>
                                             <form action="{{ route('admin.users.role', $user->id_user) }}" method="POST">
                                                 @csrf
                                                 <div class="space-y-4">
@@ -179,7 +165,7 @@
                                     <div id="reset-modal-{{ $user->id_user }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm">
                                         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4 transform transition-all">
                                             <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Reset Password</h3>
-                                            <p class="text-sm text-gray-500 mb-6">For user: <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $user->username }}</span></p>
+                                            <p class="text-sm text-gray-500 mb-6">For user: <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $user->nama_lengkap ?? $user->email }}</span></p>
                                             <form action="{{ route('admin.users.reset', $user->id_user) }}" method="POST">
                                                 @csrf
                                                 <div class="space-y-4">
@@ -203,7 +189,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-6 py-12 text-center">
+                                <td colspan="6" class="px-6 py-12 text-center">
                                     <div class="flex flex-col items-center">
                                         <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                                         <p class="text-gray-500 dark:text-gray-400">No active users found.</p>
@@ -241,9 +227,9 @@
                         <tr>
                             <th class="px-6 py-4">No</th>
                             <th class="px-6 py-4">
-                                <a href="{{ request()->fullUrlWithQuery(['sort_deleted' => 'username', 'order_deleted' => request('sort_deleted') == 'username' && request('order_deleted') == 'asc' ? 'desc' : 'asc']) }}" class="flex items-center gap-1 hover:text-rose-600 transition-colors">
-                                    Username
-                                    @if(request('sort_deleted') == 'username')
+                                <a href="{{ request()->fullUrlWithQuery(['sort_deleted' => 'nama_lengkap', 'order_deleted' => request('sort_deleted') == 'nama_lengkap' && request('order_deleted') == 'asc' ? 'desc' : 'asc']) }}" class="flex items-center gap-1 hover:text-rose-600 transition-colors">
+                                    Nama Lengkap
+                                    @if(request('sort_deleted') == 'nama_lengkap')
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ request('order_deleted') == 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"></path></svg>
                                     @endif
                                 </a>
@@ -271,7 +257,7 @@
                         @forelse($deletedUsers as $user)
                             <tr class="bg-white dark:bg-gray-800 hover:bg-rose-50/30 dark:hover:bg-rose-900/10 transition-colors">
                                 <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ $deletedUsers->firstItem() + $loop->index }}</td>
-                                <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ $user->username }}</td>
+                                <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ $user->nama_lengkap ?? $user->email }}</td>
                                 <td class="px-6 py-4">{{ $user->email }}</td>
                                 <td class="px-6 py-4 text-xs text-rose-600 dark:text-rose-400">{{ $user->deleted_at?->format('d M Y H:i') }}</td>
                                 <td class="px-6 py-4">
@@ -296,7 +282,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-12 text-center">
+                                <td colspan="6" class="px-6 py-12 text-center">
                                     <div class="flex flex-col items-center">
                                         <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                         <p class="text-gray-500 dark:text-gray-400">Trash bin is empty.</p>
@@ -359,7 +345,7 @@
                             <tr class="bg-white dark:bg-gray-800 hover:bg-amber-50/20 dark:hover:bg-amber-900/10 transition-colors">
                                 <td class="px-6 py-4 text-xs">{{ $item->created_at->format('d M H:i:s') }}</td>
                                 <td class="px-6 py-4">
-                                    <div class="font-medium text-gray-900 dark:text-white">{{ $item->user->username ?? 'Deleted User' }}</div>
+                                    <div class="font-medium text-gray-900 dark:text-white">{{ optional($item->user)->nama_lengkap ?? optional($item->user)->email ?? 'Deleted User' }}</div>
                                     <div class="text-[10px] text-gray-400">{{ $item->user->email ?? 'N/A' }}</div>
                                 </td>
                                 <td class="px-6 py-4"><span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-[10px] uppercase font-bold">{{ $item->field }}</span></td>
@@ -370,7 +356,7 @@
                                         <span class="text-emerald-500 font-bold">{{ $item->new_value }}</span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-xs font-medium text-indigo-600 dark:text-indigo-400">{{ $item->admin->username ?? 'System' }}</td>
+                                <td class="px-6 py-4 text-xs font-medium text-indigo-600 dark:text-indigo-400">{{ optional($item->admin)->nama_lengkap ?? optional($item->admin)->email ?? 'System' }}</td>
                                 <td class="px-6 py-4 text-center">
                                     <form action="{{ route('admin.history.revert', $item->id_history) }}" method="POST" onsubmit="return confirm('Kembalikan data ke nilai sebelumnya?')">
                                         @csrf

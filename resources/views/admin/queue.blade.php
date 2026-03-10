@@ -16,7 +16,6 @@
 
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Registration Queue</h1>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Verifikasi berkas pendaftaran. Siswa yang disetujui akan menerima link tes di inbox.</p>
     </div>
 
     <div class="mb-6 flex flex-wrap gap-2">
@@ -32,7 +31,7 @@
 
     <div class="mb-4 flex justify-between items-center gap-4">
         <form action="{{ route('admin.queue') }}" method="GET" class="relative flex-1 max-w-sm">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search NISN or name..." 
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search NISN, name, or email..." 
                 data-live-search="true" data-target="#table-container"
                 class="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-indigo-500 transition-all">
             <div class="absolute left-3 top-2.5 text-gray-400">
@@ -83,7 +82,7 @@
                     @forelse($registrations as $reg)
                         <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                             <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ $reg->nisn }}</td>
-                            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ $reg->nama_lengkap }}</td>
+                            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ $reg->nama_lengkap ?? $reg->email ?? '-' }}</td>
                             <td class="px-6 py-4">{{ $reg->jenis_kelamin }}</td>
                             <td class="px-6 py-4">{{ $reg->sekolah_asal }}</td>
                             <td class="px-6 py-4">{{ $reg->no_hp }}</td>
@@ -124,13 +123,13 @@
                                         <div class="grid grid-cols-2 gap-4 text-sm">
                                             <div><span class="font-medium text-gray-700 dark:text-gray-300">NISN:</span> <span class="text-gray-900 dark:text-white">{{ $reg->nisn }}</span></div>
                                             <div><span class="font-medium text-gray-700 dark:text-gray-300">NIK:</span> <span class="text-gray-900 dark:text-white">{{ $reg->nik }}</span></div>
-                                            <div><span class="font-medium text-gray-700 dark:text-gray-300">Nama:</span> <span class="text-gray-900 dark:text-white">{{ $reg->nama_lengkap }}</span></div>
+                                            <div><span class="font-medium text-gray-700 dark:text-gray-300">Nama:</span> <span class="text-gray-900 dark:text-white">{{ $reg->nama_lengkap ?? $reg->email ?? '-' }}</span></div>
                                             <div><span class="font-medium text-gray-700 dark:text-gray-300">Email:</span> <span class="text-gray-900 dark:text-white">{{ $reg->email }}</span></div>
                                             <div><span class="font-medium text-gray-700 dark:text-gray-300">Tempat Lahir:</span> <span class="text-gray-900 dark:text-white">{{ $reg->tempat_lahir }}</span></div>
                                             <div><span class="font-medium text-gray-700 dark:text-gray-300">Tanggal Lahir:</span> <span class="text-gray-900 dark:text-white">{{ $reg->tanggal_lahir ? \Carbon\Carbon::parse($reg->tanggal_lahir)->format('d M Y') : '-' }}</span></div>
                                             <div><span class="font-medium text-gray-700 dark:text-gray-300">Jenis Kelamin:</span> <span class="text-gray-900 dark:text-white">{{ $reg->jenis_kelamin }}</span></div>
                                             <div><span class="font-medium text-gray-700 dark:text-gray-300">Agama:</span> <span class="text-gray-900 dark:text-white">{{ $reg->agama }}</span></div>
-                                            <div><span class="font-medium text-gray-700 dark:text-gray-300">Anak Ke:</span> <span class="text-gray-900 dark:text-white">{{ $reg->anak_ke }}</span></div>
+                                            <div><span class="font-medium text-gray-700 dark:text-gray-300">Anak Ke:</span> <span class="text-gray-900 dark:text-white">{{ $reg->{'anak_ke-'} ?? $reg->anak_ke ?? '-' }}</span></div>
                                             <div><span class="font-medium text-gray-700 dark:text-gray-300">No HP:</span> <span class="text-gray-900 dark:text-white">{{ $reg->no_hp }}</span></div>
                                             <div class="col-span-2"><span class="font-medium text-gray-700 dark:text-gray-300">Alamat:</span> <span class="text-gray-900 dark:text-white">{{ $reg->alamat_lengkap }}</span></div>
                                             <div><span class="font-medium text-gray-700 dark:text-gray-300">Nama Ayah:</span> <span class="text-gray-900 dark:text-white">{{ $reg->nama_ayah }}</span></div>
